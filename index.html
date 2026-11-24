@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monstros da Mitologia Grega</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --tinta: #1b1a18;
+    --botao-texto: #f4f1ea;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: #000;
+    overflow: hidden;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Rubik", system-ui, sans-serif;
+  }
+
+  /* Palco 16:9 que ocupa o máximo da tela sem cortar nada */
+  .palco {
+    position: relative;
+    width: min(100vw, calc(100vh * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: #000;
+  }
+  .palco img, .palco video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* Botão no centro inferior, dentro da capa */
+  .botao {
+    position: absolute;
+    left: 50%;
+    bottom: 7%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: .5em;
+    border: 0;
+    border-radius: 999px;
+    padding: .55em 1.6em;
+    background: var(--tinta);
+    color: var(--botao-texto);
+    font: inherit;
+    font-size: clamp(16px, 2.6vw, 48px);
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0,0,0,.35);
+    transition: transform .15s ease;
+  }
+  .botao:hover { transform: translateX(-50%) scale(1.05); }
+  .botao:active { transform: translateX(-50%) scale(.97); }
+  .botao:focus-visible { outline: 3px solid #c0392b; outline-offset: 3px; }
+  .botao svg { width: 1.1em; height: 1.1em; fill: currentColor; }
+
+  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: reduce) { .botao { transition: none; } }
+</style>
+</head>
+<body>
+<div class="palco">
+  <img id="capa" src="capa.jpg" alt="Capa do trabalho: Monstros da Mitologia Grega">
+  <video id="video" src="video.mp4" controls playsinline preload="auto" hidden></video>
+
+  <button id="comecar" class="botao" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+    Começar
+  </button>
+</div>
+
+<script>
+  const capa = document.getElementById('capa');
+  const video = document.getElementById('video');
+  const botao = document.getElementById('comecar');
+  let voltarTimer = null;
+
+  function telaCheia(ligar) {
+    const el = document.documentElement;
+    if (ligar && !document.fullscreenElement && el.requestFullscreen) {
+      el.requestFullscreen().catch(() => {});
+    } else if (!ligar && document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+  }
+
+  function mostrarCapa() {
+    clearTimeout(voltarTimer);
+    video.pause();
+    video.currentTime = 0;
+    video.hidden = true;
+    capa.hidden = false;
+    botao.hidden = false;
+    botao.focus({ preventScroll: true });
+  }
+
+  botao.addEventListener('click', () => {
+    clearTimeout(voltarTimer);
+    telaCheia(true);
+    capa.hidden = true;
+    botao.hidden = true;
+    video.hidden = false;
+    video.currentTime = 0;
+    video.play();
+  });
+
+  // Ao terminar, o vídeo para e, depois de 2 segundos, volta para a capa.
+  video.addEventListener('ended', () => {
+    voltarTimer = setTimeout(mostrarCapa, 2000);
+  });
+
+  // Se tocar de novo ou mexer na barra durante os 2 segundos, cancela o retorno.
+  video.addEventListener('play', () => clearTimeout(voltarTimer));
+  video.addEventListener('seeking', () => clearTimeout(voltarTimer));
+
+  // Tecla F liga/desliga a tela cheia (útil antes de começar).
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'f' || e.key === 'F') telaCheia(!document.fullscreenElement);
+  });
+</script>
+</body>
+</html>
